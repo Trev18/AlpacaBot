@@ -5,7 +5,7 @@ def on_open(ws):
     print("opened")
     auth_data = {
         "action": "authenticate",
-        "data": {"key_id": "PK1X4W2RZG5TB15V0QGM", "secret_key": "dYUMhwHitUflmI6cWNRu2sQHHwwu1LOh9y5DVBa9"}
+        "data": {"key_id": "XXXXXXXXXXX", "secret_key": "XXXXXXXXXXX"}
     }
 
     ws.send(json.dumps(auth_data))
