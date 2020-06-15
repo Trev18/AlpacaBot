@@ -16,8 +16,8 @@ requests_log.propagate = True
 
 # API KEYS
 
-API_KEY = "PK1X4W2RZG5TB15V0QGM"
-API_SECRET = "dYUMhwHitUflmI6cWNRu2sQHHwwu1LOh9y5DVBa9"
+API_KEY = "XXXXXXXXX"
+API_SECRET = "XXXXXXXXXXX"
 BASE_URL = "https://paper-api.alpaca.markets"
 ORDERS_URL = "{}/v2/orders".format(BASE_URL)
 HEADERS = {'APCA-API-KEY-ID': API_KEY, 'APCA-API-SECRET-KEY': API_SECRET}
@@ -35,7 +35,7 @@ class BracketOrder:
         print("opened")
         auth_data = {
         "action": "authenticate",
-        "data": {"key_id": "PK1X4W2RZG5TB15V0QGM", "secret_key": "dYUMhwHitUflmI6cWNRu2sQHHwwu1LOh9y5DVBa9"}
+        "data": {"key_id": "XXXXXXXXXXXX", "secret_key": "XXXXXXXXXXXXX"}
         }
 
         ws.send(json.dumps(auth_data))
