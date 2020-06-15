@@ -20,14 +20,21 @@ now=dt.datetime.now()
 
 df=pdr.get_data_yahoo(stocks,start,now)
 
-ma=50
-smaString="Sma_"+str(ma)
+ma1=20
+smaString="Sma_"+str(ma1)
 
-df[smaString]=df.iloc[:,4].rolling(window=ma).mean()
+df[smaString]=df.iloc[:,4].rolling(window=ma1).mean()
 
-df=df.iloc[ma:]
+df=df.iloc[ma1:]
 
-print(df) 
+ma2=200
+smaString="Sma_"+str(ma2)
+
+df[smaString]=df.iloc[:,4].rolling(window=ma2).mean()
+
+df=df.iloc[ma2:]
+
+print(df)
 
 # for i in df.index:
 #     print(df["Adj Close"][i])
