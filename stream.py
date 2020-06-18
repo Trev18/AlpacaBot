@@ -1,16 +1,16 @@
-import config
+#import config
 import websocket, json
 
 def on_open(ws):
     print("opened")
     auth_data = {
         "action": "authenticate",
-        "data": {"key_id": "XXXXXXXXXXX", "secret_key": "XXXXXXXXXXX"}
+        "data": {"key_id": "XXXXXXXXXXXXX", "secret_key": "XXXXXXXXXXXXXXXXXXX"}
     }
 
     ws.send(json.dumps(auth_data))
 
-    listen_message = {"action": "listen", "data": {"streams": ["AM.BA", "AM.MSFT", "AM.JPM"]}}
+    listen_message = {"action": "listen", "data": {"streams": ["AM.BA"]}}
 
     ws.send(json.dumps(listen_message))
 
@@ -18,13 +18,19 @@ def on_open(ws):
 def on_message(ws, message):
     print("received a message")
     print(message)
+    volume = message.v
+    open_price = message.o
+    close_price = message.c
+    high_price = message.h
+    low_price = message.l
+    average_price = message.a
+    ticker = message.T
 
-def on_close(ws):
-    print("closed connection")
+#def on_close(ws):
+    #print("closed connection")
 
 socket = "wss://data.alpaca.markets/stream"
 
-ws = websocket.WebSocketApp(socket, on_open=on_open, on_message=on_message, on_close=on_close)
+ws = websocket.WebSocketApp(socket, on_open=on_open, on_message=on_message) #on_close=on_close)
 ws.run_forever()
-
 
