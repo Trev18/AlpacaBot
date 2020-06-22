@@ -21,8 +21,8 @@ requests_log.propagate = True
 
 # API KEYS
 
-API_KEY = "XXXXXXXXX"
-API_SECRET = "XXXXXXXXXX"
+API_KEY = "PK1X4W2RZG5TB15V0QGM"
+API_SECRET = "dYUMhwHitUflmI6cWNRu2sQHHwwu1LOh9y5DVBa9"
 BASE_URL = "https://paper-api.alpaca.markets"
 ORDERS_URL = "{}/v2/orders".format(BASE_URL)
 HEADERS = {'APCA-API-KEY-ID': API_KEY, 'APCA-API-SECRET-KEY': API_SECRET}
@@ -30,10 +30,10 @@ HEADERS = {'APCA-API-KEY-ID': API_KEY, 'APCA-API-SECRET-KEY': API_SECRET}
 class BracketOrder:
   ws = None
   average = None
-  sumOfRanges = None
-  total = None
-  previous_range = None
-  previous_high = None
+  sumOfRanges = 0
+  total = 0
+  previous_range = 0
+  previous_high = 0
   def __init__(self):
     self.alpaca = tradeapi.REST(API_KEY, API_SECRET, BASE_URL, api_version='v2')
     
@@ -45,28 +45,29 @@ class BracketOrder:
         #print("opened")
         auth_data = {
         "action": "authenticate",
-        "data": {"key_id": "XXXXXXXXXXX", "secret_key": "XXXXXXXXXXXX"}
+        "data": {"key_id": "PK1X4W2RZG5TB15V0QGM", "secret_key": "dYUMhwHitUflmI6cWNRu2sQHHwwu1LOh9y5DVBa9"}
         }
 
         ws.send(json.dumps(auth_data))
 
         listen_message = {"action": "listen", "data": {"streams": ["AM.BA"]}}
 
+        volume = listen_message.get
         ws.send(json.dumps(listen_message))
 
     def is_bar1(high,low,average):
         if(high - low > average):
             return True
-        else return False
+        else: return False
     def is_bar2(previous_range,high,low,previous_high):
         if(high - low > previous_range*.5 and previous_high - high < 1):
             return True
-        else return False
+        else: return False
 
     def on_message(ws, message):
         #print("received a message")
         print(message)
-        volume = message.v
+        volume = message.get("v")
         open_price = message.o
         close_price = message.c
         high_price = message.h
@@ -88,7 +89,7 @@ class BracketOrder:
                 "limit_price": close_price*1.02
                 },
             "stop_loss": {
-                "stop_price": close_price(0.98),
+                "stop_price": close_price*0.98,
                 }
             }
             r = requests.post(ORDERS_URL, json=data, headers=HEADERS)
@@ -97,7 +98,7 @@ class BracketOrder:
         previous_range = high_price - low_price
         previous_high = high_price
     def on_close(ws):
-        print("")
+        print("Market is closed")
 
     ws = websocket.WebSocketApp(socket, on_open=on_open, on_message=on_message, on_close=on_close)
     ws.run_forever()
