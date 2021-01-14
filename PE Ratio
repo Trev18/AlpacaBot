@@ -1,0 +1,63 @@
+def create_order(symbol, qty, side, type, time_in_force): #order_class, take_profit.limit_price, stop_price  ):
+    data = {
+        "symbol": symbol,
+        "qty": qty,
+        "side": side,
+        "type": type,
+        "time_in_force": time_in_force,
+        #"order_class" : order_class,
+        #"take_profit" : take_profit,
+        #"limit_price": limit_price,
+        #"stop_loss" : stop_loss,
+        #"stop_price": stop_price,
+    }
+
+    r = requests.post(ORDERS_URL, json=data, headers=HEADERS)
+
+    return json.loads(r.content)
+
+### obtain account information
+#account = api.get_account()
+
+##create watchlist
+scanner = ['VNO',	'NRG',	'NLOK',	'UAL',	'XRX',	'AAL',	'UNM',	'CCL',	'DAL',	'HFC',	'NCLH',	
+'SYF',	'COP',	'CINF',	'VIAC',	'ALL',	'CMA',	'PRU',	'BIIB',	'MGM',	'C',	'MET',	'WFC',	
+'RCL','SHIP','FENG','ACOR','VHC','NNA','UIS','ORGS','SND',	
+'TNK',	'TMQ',	'XBIT',	'JOB',	'LODE',	'CANG',	'MMAC',	'TROX',	'DX',	'MX',	'FRO',	
+'FVE',	'CTRM',	'CTO',	'TPHS',	'FLY',	'DXYN',	'EURN',	'BIG',	'DSSI',	'CNNE',	'OSN',	
+'ARD',	'FTFT',	'DHT',	'AEL',	'PFSI',	'SNFCA','VRS']
+##add EPS's for the stocks
+scanner_dict = {'VNO':0.29,'NRG':15.65,'NLOK':5.06, 'UAL':-16.45,'XRX':4.1,'AAL':-13.84,'UNM':4.66,
+'CCL':-10.29,'DAL':-16.61,'HFC':-2.61,'NCLH':-13.73,'SYF':2.18,'COP':-1.13,'CINF' :4.85,'VIAC':2.2,
+'ALL':14.26,'CMA':3.63,	'PRU':-0.36,'BIIB':30.21,'MGM':2.8,	'C':5.1,'MET':6.09,	'WFC':0.37,	'RCL':-19.73,
+'SHIP':-3.65,'FENG':1.62,'ACOR':6.13,'VHC':3.99,'NNA':2.62,'UIS':14.59,'ORGS':4.65,
+'SND':1.09,'TNK':6.58,'TMQ':1.07,'XBIT':14.49,'JOB':0.57,'LODE':0.64,'CANG':1.85,'MMAC':11.28,'TROX':6.37,
+'DX':7.56,'MX':6.4,'FRO':2.69,'FVE':2.82,'CTRM':0.12,'CTO':19.82,'TPHS':0.62,'FLY':3.73,'DXYN':0.99,
+'EURN':3.21,'BIG':15.7,'DSSI':2.67,'CNNE':15.81,'OSN':1.62,'ARD':6.21,'FTFT':2.57,'DHT':2.03,'AEL':9.38,
+'PFSI':17.03,'SNFCA':2.76,'VRS':3.65}
+##retrieve and store current portfolio positions
+##retrieve and store last close price for every stock in watchlist
+positions = []
+portfolio = api.list_positions()
+barset = api.get_barset(scanner, '1D', limit=1)
+for x in portfolio :
+   positions.append(x.symbol)
+
+##create function to pull out stocks we dont already own
+def diff(li1, li2):
+    return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
+ 
+li1 = scanner
+li2 = positions
+
+##create buy order for stocks that meet P/E ratio, and we don't own
+buying_stocks = (diff(li1, li2))
+for y in buying_stocks:
+    if (barset[y][0].c / scanner_dict[y]) < 24 :
+        create_order(y, 1, "buy", "market", "gtc")
+        print("Buying: ", y)
+##check current positions, and see if we need to sell based off of P/E ratio
+for x in positions:
+    if (barset[x][0].c / scanner_dict[x]) > 24 :
+        create_order(x, 1, "sell", "market", "gtc")
+        print("Selling: ", x)
