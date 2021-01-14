@@ -1,20 +1,3 @@
-import requests, json
-import config
-#import stream
-
-API_KEY = 'XXXXXXXXXXX'
-SECRET_KEY =  'XXXXXXXXXXXX'
-
-BASE_URL = "https://paper-api.alpaca.markets"
-ACCOUNT_URL = "{}/v2/account".format(BASE_URL)
-ORDERS_URL = "{}/v2/orders".format(BASE_URL)
-HEADERS = {'APCA-API-KEY-ID' : API_KEY, 'APCA-API-SECRET-KEY' : SECRET_KEY}
-STOCK_1 = "BA"
-def get_account(): 
-    r = requests.get(ACCOUNT_URL, headers=HEADERS)
- 
-    return json.loads(r.content)
-
 def create_order(symbol, qty, side, type, time_in_force): #order_class, take_profit.limit_price, stop_price  ): 
     data = {
         "symbol": symbol,
