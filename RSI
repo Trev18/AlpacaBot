@@ -1,0 +1,57 @@
+import alpaca_trade_api as tradeapi
+import requests
+import json
+import pandas
+import pandas_datareader.data as web
+import datetime
+import matplotlib.pyplot as plt
+from datetime import datetime
+
+# Window length for moving average
+window_length = 14
+scanner = ["AAPL", 'TSLA', 'BA']
+# Dates
+start  = '2020-12-31'
+end = '2021-01-14'
+
+# Get data
+for i in scanner:
+    data = web.DataReader(i, 'yahoo', start, end)
+# Get just the adjusted close
+    close = data['Adj Close']
+    
+# Get the difference in price from previous step
+    delta = close.diff()
+# Get rid of the first row, which is NaN since it did not have a previous 
+# row to calculate the differences
+    delta = delta[1:] 
+
+# Make the positive gains (up) and negative gains (down) Series
+    up, down = delta.copy(), delta.copy()
+    up[up < 0] = 0
+    down[down > 0] = 0
+
+# Calculate the EWMA
+    roll_up1 = up.ewm(span=window_length).mean()
+    roll_down1 = down.abs().ewm(span=window_length).mean()
+
+# Calculate the RSI based on EWMA
+    RS1 = roll_up1 / roll_down1
+    RSI1 = (100.0 - (100.0 / (1.0 + RS1)))
+
+# Calculate the SMA
+    # roll_up2 = up.rolling(window_length).mean()
+    # roll_down2 = down.abs().rolling(window_length).mean()
+
+# Calculate the RSI based on SMA
+    # RS2 = roll_up2 / roll_down2
+    # RSI2 = 100.0 - (100.0 / (1.0 + RS2))
+
+# Compare graphically
+    
+    print(RSI1, i)
+    
+    
+    
+    # x , y = RSI1 , i
+    # print(y)
