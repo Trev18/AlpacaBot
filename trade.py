@@ -16,8 +16,8 @@ def create_order(symbol, qty, side, type, time_in_force): #order_class, take_pro
 
     return json.loads(r.content)
 
-response = create_order("MSFT", 1, "buy", "market", "gtc")
-#response = create_order("BA", 1, "buy", "market", "gtc")
+create_order("MSFT", 1, "buy", "market", "gtc")
+create_order("BA", 1, "buy", "market", "gtc")
 
 
 print(response)
