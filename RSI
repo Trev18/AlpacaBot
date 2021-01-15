@@ -1,22 +1,98 @@
 import alpaca_trade_api as tradeapi
 import requests
 import json
-import pandas
+import pandas as pd
 import pandas_datareader.data as web
 import datetime
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-# Window length for moving average
-window_length = 14
-scanner = ["AAPL", 'TSLA', 'BA']
+
+API_KEY = 'API_KEY'
+SECRET_KEY =  'SECRET_KEY'
+
+BASE_URL = "https://paper-api.alpaca.markets"
+ACCOUNT_URL = "{}/v2/account".format(BASE_URL)
+ORDERS_URL = "{}/v2/orders".format(BASE_URL)
+HEADERS = {'APCA-API-KEY-ID' : API_KEY, 'APCA-API-SECRET-KEY' : SECRET_KEY}
+
+###Call the API
+api = tradeapi.REST(API_KEY, SECRET_KEY, BASE_URL, api_version='v2')
+
+def create_order(symbol, qty, side, type, time_in_force): #order_class, take_profit.limit_price, stop_price  ):
+    data = {
+        "symbol": symbol,
+        "qty": qty,
+        "side": side,
+        "type": type,
+        "time_in_force": time_in_force,
+        #"order_class" : order_class,
+        #"take_profit" : take_profit,
+        #"limit_price": limit_price,
+        #"stop_loss" : stop_loss,
+        #"stop_price": stop_price,
+    }
+
+    r = requests.post(ORDERS_URL, json=data, headers=HEADERS)
+
+    return json.loads(r.content)
+
+
+##watchlist
+scanner = ['VNO','NRG',	'NLOK',	'UAL','XRX',	'AAL',	'UNM',	'CCL',	'DAL',	'HFC',	'NCLH',	
+'SYF',	'COP',	'CINF',	'VIAC',	'ALL',	'CMA',	'PRU',	'BIIB',	'MGM',	'C',	'MET',	'WFC',	
+'RCL','SHIP','FENG','ACOR','VHC','NNA','UIS','ORGS','SND',	
+'TNK',	'TMQ',	'XBIT',	'JOB',	'LODE',	'CANG',	'MMAC',	'TROX',	'DX',	'MX',	'FRO',	
+'FVE',	'CTRM',	'CTO',	'TPHS',	'FLY',	'DXYN',	'EURN',	'BIG',	'DSSI',	'CNNE',	'OSN',	
+'ARD',	'FTFT',	'DHT',	'AEL',	'PFSI',	'SNFCA','VRS', 'TSLA', 'JPM',]
+positions = []
+portfolio = api.list_positions()
+for x in portfolio :
+   positions.append(x.symbol)
+
+def diff(li1, li2):
+    return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
+ 
+li1 = scanner
+li2 = positions
+
+buying_stocks = (diff(li1, li2))
+for i in buying_stocks:
+    window_length = 14
+    start  = '2020-12-24'
+    end = '2021-01-14'
+    data = web.DataReader(i, 'yahoo', start, end)
+    close = data['Adj Close']
+    delta = close.diff()
+    delta = delta[1:] 
+    up, down = delta.copy(), delta.copy()
+    up[up < 0] = 0
+    down[down > 0] = 0
+
+    # Calculate the EWMA
+    roll_up1 = up.ewm(span=window_length).mean()
+    roll_down1 = down.abs().ewm(span=window_length).mean()
+
+    # # Calculate the RSI based on EWMA
+    RS1 = roll_up1 / roll_down1
+    
+    RSI1 = (100.0 - (100.0 / (1.0 + RS1)))
+    RSI1_array = RSI1.array
+    
+    if RSI1_array[12] < 30:
+        #create_order(i, 1, "buy", "market", "gtc")
+        print('buying', i, 'at a ',RSI1_array[12], 'RSI Value')
+    
+for x in positions:
+    window_length = 14
+    
 # Dates
-start  = '2020-12-31'
-end = '2021-01-14'
+    start  = '2020-12-24'
+    end = '2021-01-14'
 
 # Get data
-for i in scanner:
-    data = web.DataReader(i, 'yahoo', start, end)
+
+    data = web.DataReader(x, 'yahoo', start, end)
 # Get just the adjusted close
     close = data['Adj Close']
     
@@ -35,23 +111,13 @@ for i in scanner:
     roll_up1 = up.ewm(span=window_length).mean()
     roll_down1 = down.abs().ewm(span=window_length).mean()
 
-# Calculate the RSI based on EWMA
+# # Calculate the RSI based on EWMA
     RS1 = roll_up1 / roll_down1
-    RSI1 = (100.0 - (100.0 / (1.0 + RS1)))
+    
+    RSI2 = (100.0 - (100.0 / (1.0 + RS1)))
+    RSI2_array = RSI2.array
 
-# Calculate the SMA
-    # roll_up2 = up.rolling(window_length).mean()
-    # roll_down2 = down.abs().rolling(window_length).mean()
-
-# Calculate the RSI based on SMA
-    # RS2 = roll_up2 / roll_down2
-    # RSI2 = 100.0 - (100.0 / (1.0 + RS2))
-
-# Compare graphically
     
-    print(RSI1, i)
-    
-    
-    
-    # x , y = RSI1 , i
-    # print(y)
+    if RSI2_array[12] > 80:
+        #create_order(x, 1, "sell", "market", "gtc")
+        print('selling', x, 'at a',RSI2_array[12], 'RSI Value')
