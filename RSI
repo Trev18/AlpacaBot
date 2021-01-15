@@ -83,7 +83,7 @@ for i in buying_stocks:
     RSI1_array = RSI1.array
     
     #check the latest RSI value, and if it is low enough, buy the stock
-    if RSI1_array[12] < 30:
+    if RSI1_array[-1] < 30:
         #create_order(i, 1, "buy", "market", "gtc")
         print('buying', i, 'at a ',RSI1_array[12], 'RSI Value')
     
@@ -125,7 +125,7 @@ for x in positions:
     RSI2_array = RSI2.array
 
     #check the latest RSI value, and if it is high enough, sell the stock
-    if RSI2_array[12] > 80:
+    if RSI2_array[-1] > 80:
         #create_order(x, 1, "sell", "market", "gtc")
         print('selling', x, 'at a',RSI2_array[12], 'RSI Value')
     
