@@ -5,7 +5,7 @@ import pandas as pd
 import pandas_datareader.data as web
 import datetime
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import date, timedelta
 
 #Headers
 API_KEY = 'PK1X4W2RZG5TB15V0QGM'
@@ -50,7 +50,9 @@ portfolio = api.list_positions()
 for x in portfolio :
    positions.append(x.symbol)
 
-
+start  = (date.today()-timedelta(days=14)).isoformat()
+end = date.today().isoformat()
+window_length = 14
 #calculate difference in 2 lists, and set those as a vairable buying_stocks
 def diff(li1, li2):
     return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
@@ -61,9 +63,6 @@ buying_stocks = (diff(li1, li2))
 
 #look through stocks we don't own, and check if the RSI value is buyable
 for i in buying_stocks:
-    window_length = 14
-    start  = '2020-12-24'
-    end = '2021-01-14'
     data = web.DataReader(i, 'yahoo', start, end)
     close = data['Adj Close']
     delta = close.diff()
@@ -85,18 +84,13 @@ for i in buying_stocks:
     #check the latest RSI value, and if it is low enough, buy the stock
     if RSI1_array[-1] < 30:
         #create_order(i, 1, "buy", "market", "gtc")
-        print('buying', i, 'at a ',RSI1_array[12], 'RSI Value')
+        print('buying', i, 'at a ',RSI1_array[-1], 'RSI Value')
     
 
 
 ##Look through stocks we already own, and check if the RSI value is sellable
 for x in positions:
-    window_length = 14
-    
-# Dates
-    start  = '2020-12-24'
-    end = '2021-01-14'
-
+   
 # Get data
 
     data = web.DataReader(x, 'yahoo', start, end)
@@ -127,5 +121,5 @@ for x in positions:
     #check the latest RSI value, and if it is high enough, sell the stock
     if RSI2_array[-1] > 80:
         #create_order(x, 1, "sell", "market", "gtc")
-        print('selling', x, 'at a',RSI2_array[12], 'RSI Value')
+        print('selling', x, 'at a',RSI2_array[-1], 'RSI Value')
     
